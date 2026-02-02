@@ -258,11 +258,6 @@ final apiService = getIt<ApiService>();
 - **Widget Tests**: Critical UI components and flows
 - **Integration Tests**: End-to-end user journeys
 
-## Documentation
-
-- 📖 [Architecture Guide](../ARCHITECTURE_GUIDE.md) - Detailed architecture explanation
-- 📋 [Implementation Guide](../IMPLEMENTATION_GUIDE.md) - Phase-by-phase implementation plan
-- 📄 [PRD](../enterprise_flutter_mobile_app_prd.md) - Product requirements document
 
 ## Contributing
 
@@ -287,10 +282,4 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 This project is private and proprietary.
 
-## Contact
-
-For questions or support, please contact the development team.
-
 ---
-
-**Built with ❤️ using Flutter**
