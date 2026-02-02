@@ -144,7 +144,7 @@ class _LoginViewState extends State<LoginView> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.errorLight.withOpacity(0.1),
+        color: AppColors.errorLight.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
         border: Border.all(
           color: AppColors.error,
@@ -245,10 +245,10 @@ class _LoginViewState extends State<LoginView> {
     return Container(
       padding: const EdgeInsets.all(AppDimensions.md),
       decoration: BoxDecoration(
-        color: AppColors.infoLight.withOpacity(0.1),
+        color: AppColors.infoLight.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
         border: Border.all(
-          color: AppColors.info.withOpacity(0.3),
+          color: AppColors.info.withValues(alpha: 0.3),
           width: AppDimensions.borderThin,
         ),
       ),

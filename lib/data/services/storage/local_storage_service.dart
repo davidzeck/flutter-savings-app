@@ -222,6 +222,7 @@ class _StorageKeys {
 
   // Secure Storage Keys
   static const String authToken = 'auth_token';
+  // ignore: unused_field - reserved for future refresh token support
   static const String refreshToken = 'refresh_token';
 
   // Shared Preferences Keys

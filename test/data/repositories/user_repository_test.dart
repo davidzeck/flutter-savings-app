@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:enterprise_flutter_mobile_app/core/exceptions/app_exceptions.dart';
 import 'package:enterprise_flutter_mobile_app/core/utils/network_info.dart';
-import 'package:enterprise_flutter_mobile_app/data/models/user.dart';
 import 'package:enterprise_flutter_mobile_app/data/repositories/user_repository.dart';
 import 'package:enterprise_flutter_mobile_app/data/services/api/api_service.dart';
 import 'package:enterprise_flutter_mobile_app/data/services/storage/local_storage_service.dart';
@@ -40,8 +39,6 @@ void main() {
         'bio': 'A test user',
         'phone': '+1234567890',
       };
-
-  User testUser() => User.fromJson(testUserJson());
 
   group('UserRepository', () {
     // =========================================================================
@@ -90,7 +87,7 @@ void main() {
             await repository.login('demo@example.com', 'password123');
 
         // Assert
-        expect(result.name, 'Demo User');
+        expect(result.name, 'Sarah Mitchell');
         expect(result.email, 'demo@example.com');
         verify(() => mockLocalStorage.saveToken(any())).called(1);
       });

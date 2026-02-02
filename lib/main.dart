@@ -6,8 +6,8 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/splash/splash_view.dart';
 import 'features/auth/login/login_view.dart';
 import 'features/auth/login/login_viewmodel.dart';
-import 'features/dashboard/dashboard_view.dart';
 import 'features/dashboard/dashboard_viewmodel.dart';
+import 'features/home/home_shell.dart';
 import 'core/widgets/connectivity_banner.dart';
 
 void main() async {
@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
             ),
         '/dashboard': (context) => ChangeNotifierProvider(
               create: (_) => getIt<DashboardViewModel>(),
-              child: const DashboardView(),
+              child: const HomeShell(),
             ),
       },
     );

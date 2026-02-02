@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_strings.dart';
+import '../../data/models/dashboard_item.dart';
 import 'dashboard_viewmodel.dart';
+import 'item_detail_view.dart';
 import 'widgets/dashboard_item_card.dart';
 import 'widgets/dashboard_stats_card.dart';
 import 'widgets/shimmer_loading.dart';
@@ -82,12 +84,7 @@ class DashboardView extends StatelessWidget {
             ),
           ),
 
-        // Logout button
-        IconButton(
-          icon: const Icon(Icons.logout),
-          tooltip: AppStrings.logout,
-          onPressed: () => _handleLogout(context, viewModel),
-        ),
+        const SizedBox(width: AppDimensions.sm),
       ],
     );
   }
@@ -385,115 +382,12 @@ class DashboardView extends StatelessWidget {
   // ACTIONS
   // ============================================================================
 
-  void _showItemDetail(BuildContext context, dynamic item) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppDimensions.radiusBottomSheet),
-        ),
-      ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppDimensions.paddingScreen),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Handle bar
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: AppDimensions.md),
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius:
-                      BorderRadius.circular(AppDimensions.radiusPill),
-                ),
-              ),
-            ),
-
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: AppDimensions.sm),
-
-            Text(
-              item.description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-            const SizedBox(height: AppDimensions.md),
-
-            // Details
-            _detailRow(context, 'Category', item.category),
-            _detailRow(context, 'Priority', item.priority.name),
-            _detailRow(context, 'Status', item.status.name),
-            _detailRow(context, 'Progress', '${item.progress}%'),
-            if (item.assignedTo != null)
-              _detailRow(context, 'Assigned to', item.assignedTo!),
-
-            const SizedBox(height: AppDimensions.lg),
-          ],
-        ),
+  void _showItemDetail(BuildContext context, DashboardItem item) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ItemDetailView(item: item),
       ),
     );
-  }
-
-  Widget _detailRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppDimensions.xs),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _handleLogout(
-    BuildContext context,
-    DashboardViewModel viewModel,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text(AppStrings.confirmLogout),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text(AppStrings.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(AppStrings.logout),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && context.mounted) {
-      await viewModel.logout();
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-    }
   }
 }

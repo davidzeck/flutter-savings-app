@@ -110,7 +110,7 @@ class _SplashViewState extends State<SplashView>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -140,7 +140,7 @@ class _SplashViewState extends State<SplashView>
               Text(
                 'Enterprise Operations',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textOnPrimary.withOpacity(0.9),
+                      color: AppColors.textOnPrimary.withValues(alpha: 0.9),
                     ),
               ),
 

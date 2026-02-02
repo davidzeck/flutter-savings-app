@@ -134,8 +134,8 @@ void main() {
 
         // Assert
         expect(result.items, isNotEmpty);
-        // Mock items have 8 items
-        expect(result.items.length, 8);
+        // Mock items have 16 items
+        expect(result.items.length, 16);
       });
 
       test('should throw NetworkException when offline with no cache',

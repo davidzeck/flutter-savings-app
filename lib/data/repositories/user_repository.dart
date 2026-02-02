@@ -67,16 +67,17 @@ class UserRepository {
       throw const InvalidCredentialsException();
     }
 
-    // Create demo user
+    // Create demo user with rich profile data
     final now = DateTime.now();
     final demoUser = User(
       id: 'demo-001',
       email: _demoEmail,
-      name: 'Demo User',
-      bio: 'Enterprise Operations Manager',
-      phone: '+1 (555) 123-4567',
-      createdAt: now.subtract(const Duration(days: 90)),
-      updatedAt: now,
+      name: 'Sarah Mitchell',
+      bio: 'Senior Operations Manager at TechCorp Global. 8+ years leading cross-functional teams in enterprise digital transformation. MBA from Stanford.',
+      phone: '+1 (415) 867-5309',
+      profileImage: 'https://i.pravatar.cc/300?u=sarah-mitchell',
+      createdAt: now.subtract(const Duration(days: 730)),
+      updatedAt: now.subtract(const Duration(hours: 2)),
     );
 
     // Persist demo session
