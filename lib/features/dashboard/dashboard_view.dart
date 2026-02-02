@@ -201,55 +201,10 @@ class DashboardView extends StatelessWidget {
     BuildContext context,
     DashboardViewModel viewModel,
   ) {
-    return SizedBox(
-      height: 48,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDimensions.paddingScreen,
-        ),
-        children: DashboardFilter.values.map((filter) {
-          final isSelected = viewModel.currentFilter == filter;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppDimensions.sm),
-            child: FilterChip(
-              label: Text(_getFilterLabel(filter)),
-              selected: isSelected,
-              onSelected: (_) => viewModel.setFilter(filter),
-              selectedColor: AppColors.primary.withValues(alpha: 0.15),
-              checkmarkColor: AppColors.primary,
-              labelStyle: TextStyle(
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.textSecondary,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-              side: BorderSide(
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.border,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
+    return _ExpandableFilterChips(
+      currentFilter: viewModel.currentFilter,
+      onFilterSelected: viewModel.setFilter,
     );
-  }
-
-  String _getFilterLabel(DashboardFilter filter) {
-    switch (filter) {
-      case DashboardFilter.all:
-        return AppStrings.filterAll;
-      case DashboardFilter.active:
-        return AppStrings.filterActive;
-      case DashboardFilter.pending:
-        return AppStrings.filterPending;
-      case DashboardFilter.completed:
-        return AppStrings.filterCompleted;
-      case DashboardFilter.urgent:
-        return AppStrings.filterUrgent;
-    }
   }
 
   // ============================================================================
@@ -388,6 +343,118 @@ class DashboardView extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => ItemDetailView(item: item),
       ),
+    );
+  }
+}
+
+// =============================================================================
+// EXPANDABLE FILTER CHIPS
+// =============================================================================
+
+class _ExpandableFilterChips extends StatefulWidget {
+  final DashboardFilter currentFilter;
+  final ValueChanged<DashboardFilter> onFilterSelected;
+
+  const _ExpandableFilterChips({
+    required this.currentFilter,
+    required this.onFilterSelected,
+  });
+
+  @override
+  State<_ExpandableFilterChips> createState() => _ExpandableFilterChipsState();
+}
+
+class _ExpandableFilterChipsState extends State<_ExpandableFilterChips> {
+  bool _expanded = false;
+
+  /// Filters always visible in collapsed mode
+  static const int _visibleCount = 3;
+
+  static String _label(DashboardFilter filter) {
+    switch (filter) {
+      case DashboardFilter.all:
+        return AppStrings.filterAll;
+      case DashboardFilter.active:
+        return AppStrings.filterActive;
+      case DashboardFilter.pending:
+        return AppStrings.filterPending;
+      case DashboardFilter.completed:
+        return AppStrings.filterCompleted;
+      case DashboardFilter.urgent:
+        return AppStrings.filterUrgent;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const filters = DashboardFilter.values;
+    final visible = _expanded ? filters : filters.take(_visibleCount).toList();
+    final hiddenCount = filters.length - _visibleCount;
+
+    // If the selected filter is hidden, always show it
+    final selectedIsHidden = !_expanded &&
+        filters.indexOf(widget.currentFilter) >= _visibleCount;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.paddingScreen,
+        vertical: AppDimensions.xs,
+      ),
+      child: Wrap(
+        spacing: AppDimensions.sm,
+        runSpacing: AppDimensions.xs,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          // Visible chips
+          for (final filter in visible) _buildChip(filter),
+
+          // If collapsed and selected filter is hidden, show it too
+          if (selectedIsHidden) _buildChip(widget.currentFilter),
+
+          // Toggle button
+          if (hiddenCount > 0)
+            ActionChip(
+              avatar: Icon(
+                _expanded ? Icons.expand_less : Icons.expand_more,
+                size: 18,
+                color: AppColors.textSecondary,
+              ),
+              label: Text(
+                _expanded ? 'Less' : '+$hiddenCount more',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              onPressed: () => setState(() => _expanded = !_expanded),
+              side: const BorderSide(color: AppColors.border),
+              backgroundColor: Colors.transparent,
+              padding: EdgeInsets.zero,
+              visualDensity: VisualDensity.compact,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip(DashboardFilter filter) {
+    final isSelected = widget.currentFilter == filter;
+    return FilterChip(
+      label: Text(_label(filter)),
+      selected: isSelected,
+      onSelected: (_) => widget.onFilterSelected(filter),
+      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+      checkmarkColor: AppColors.primary,
+      labelStyle: TextStyle(
+        color: isSelected ? AppColors.primary : AppColors.textSecondary,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        fontSize: 13,
+      ),
+      side: BorderSide(
+        color: isSelected ? AppColors.primary : AppColors.border,
+      ),
+      visualDensity: VisualDensity.compact,
     );
   }
 }

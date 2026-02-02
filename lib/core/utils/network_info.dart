@@ -10,25 +10,35 @@ class NetworkInfo {
   NetworkInfo(this._connectivity);
 
   /// Check if device is connected to internet
+  ///
+  /// Returns true by default if the check fails, so the app
+  /// can attempt API calls and fall back to mock data gracefully.
   Future<bool> get isConnected async {
-    final result = await _connectivity.checkConnectivity();
-    return _isConnected(result);
+    try {
+      final result = await _connectivity.checkConnectivity();
+      return result != ConnectivityResult.none;
+    } catch (e) {
+      // If connectivity check fails, assume connected
+      // so the app can attempt API calls and fall back gracefully
+      return true;
+    }
   }
 
   /// Stream of connectivity changes
   Stream<bool> get onConnectivityChanged {
-    return _connectivity.onConnectivityChanged.map(_isConnected);
-  }
-
-  /// Check if connectivity result indicates connection
-  bool _isConnected(ConnectivityResult result) {
-    return result != ConnectivityResult.none;
+    return _connectivity.onConnectivityChanged.map(
+      (result) => result != ConnectivityResult.none,
+    );
   }
 
   /// Get current connectivity type
   Future<ConnectivityType> get connectivityType async {
-    final result = await _connectivity.checkConnectivity();
-    return _getConnectivityType(result);
+    try {
+      final result = await _connectivity.checkConnectivity();
+      return _getConnectivityType(result);
+    } catch (e) {
+      return ConnectivityType.other;
+    }
   }
 
   /// Convert ConnectivityResult to ConnectivityType

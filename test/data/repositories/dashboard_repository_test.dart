@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:enterprise_flutter_mobile_app/core/exceptions/app_exceptions.dart';
 import 'package:enterprise_flutter_mobile_app/core/utils/network_info.dart';
 import 'package:enterprise_flutter_mobile_app/data/models/dashboard_item.dart';
 import 'package:enterprise_flutter_mobile_app/data/repositories/dashboard_repository.dart';
@@ -138,18 +137,24 @@ void main() {
         expect(result.items.length, 16);
       });
 
-      test('should throw NetworkException when offline with no cache',
-          () async {
+      test('should return mock data when offline with no cache', () async {
         // Arrange
         when(() => mockNetworkInfo.isConnected)
             .thenAnswer((_) async => false);
         when(() => mockLocalStorage.getCachedItems()).thenReturn(null);
+        when(() => mockApiService.getDashboardItems(
+              page: any(named: 'page'),
+              limit: any(named: 'limit'),
+            )).thenThrow(Exception('No connection'));
+        when(() => mockLocalStorage.cacheItems(any()))
+            .thenAnswer((_) async {});
 
-        // Act & Assert
-        expect(
-          () => repository.getDashboardItems(),
-          throwsA(isA<NetworkException>()),
-        );
+        // Act
+        final result = await repository.getDashboardItems();
+
+        // Assert - should fall back to mock data, not throw
+        expect(result.items, isNotEmpty);
+        expect(result.items.length, 16);
       });
 
       test('should return local storage cache when offline', () async {

@@ -71,13 +71,8 @@ class DashboardRepository {
       );
     }
 
-    // No cache - must fetch from API
-    if (await _networkInfo.isConnected) {
-      return await _fetchFromApi(page: page, limit: limit);
-    }
-
-    // Offline with no cache
-    throw const NetworkException('No cached data available. Please connect to the internet.');
+    // No cache - try to fetch from API (which falls back to mock data on failure)
+    return await _fetchFromApi(page: page, limit: limit);
   }
 
   /// Refresh dashboard data from server
@@ -172,10 +167,8 @@ class DashboardRepository {
         isFromCache: false,
         lastUpdated: _lastFetchTime,
       );
-    } on AppException {
-      rethrow;
     } catch (e) {
-      // If API fails, try to return cached data
+      // If API fails for any reason, try to return cached data
       final cached = _getLocalCache();
       if (cached != null && cached.isNotEmpty) {
         return DashboardItemsResult(
