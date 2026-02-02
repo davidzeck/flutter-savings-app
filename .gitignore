@@ -1,0 +1,187 @@
+# ============================================================================
+# FLUTTER / DART
+# ============================================================================
+
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.packages
+
+# Code generation artifacts (regenerate with: flutter pub run build_runner build)
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.config.dart
+*.gr.dart
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# ============================================================================
+# ANDROID
+# ============================================================================
+
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/**/gradle-wrapper.jar
+.cxx/
+*.jks
+*.keystore
+!android/app/debug.keystore
+
+# ============================================================================
+# iOS / macOS
+# ============================================================================
+
+**/ios/**/*.mode1v3
+**/ios/**/*.mode2v3
+**/ios/**/*.moved-aside
+**/ios/**/*.pbxuser
+**/ios/**/*.perspectivev3
+**/ios/**/DerivedData/
+**/ios/**/Pods/
+**/ios/**/.symlinks/
+**/ios/**/Flutter/App.framework
+**/ios/**/Flutter/Flutter.framework
+**/ios/**/Flutter/Flutter.podspec
+**/ios/**/Flutter/Generated.xcconfig
+**/ios/**/Flutter/ephemeral/
+**/ios/**/Flutter/app.flx
+**/ios/**/Flutter/app.zip
+**/ios/**/Flutter/flutter_assets/
+**/ios/**/ServiceDefinitions.json
+**/ios/**/Runner/GeneratedPluginRegistrant.*
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+.ios/
+.android/
+
+# ============================================================================
+# IDE
+# ============================================================================
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Fleet
+.fleet/
+
+# ============================================================================
+# OS FILES
+# ============================================================================
+
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.class
+*.pyc
+*.swp
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# ============================================================================
+# ENTERPRISE SECURITY (NEVER COMMIT SECRETS)
+# ============================================================================
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.development
+.env.staging
+.env.production
+*.env
+
+# Secrets and keys
+secrets.json
+secrets.yaml
+firebase_options.dart
+google-services.json
+GoogleService-Info.plist
+**/api_keys.dart
+**/config/prod.dart
+**/config/production.dart
+**/config/staging.dart
+
+# Signing keys
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+*.crt
+*.cer
+
+# ============================================================================
+# TESTING & CI
+# ============================================================================
+
+# Coverage reports
+coverage/
+*.lcov
+test/.test_coverage.dart
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# ============================================================================
+# MISC
+# ============================================================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.realm
+*.hive
+*.lock.hive
+
+# FVM (Flutter Version Management)
+.fvm/flutter_sdk
+.fvm/fvm_config.json
+
+# Localization
+*.arb.lock
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+
+# Logs
+logs/
+*.log
