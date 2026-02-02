@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../../core/constants/app_strings.dart';
 import '../../core/exceptions/app_exceptions.dart';
 import '../../data/models/dashboard_item.dart';
+import '../../data/models/user.dart';
 import '../../data/repositories/dashboard_repository.dart';
 import '../../data/repositories/user_repository.dart';
 
@@ -49,6 +50,7 @@ class DashboardViewModel extends ChangeNotifier {
   String? _errorMessage;
   DateTime? _lastUpdated;
   String _userName = '';
+  User? _currentUser;
 
   // ============================================================================
   // GETTERS
@@ -63,6 +65,7 @@ class DashboardViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   DateTime? get lastUpdated => _lastUpdated;
   String get userName => _userName;
+  User? get currentUser => _currentUser;
   bool get hasItems => _filteredItems.isNotEmpty;
   bool get hasError => _errorMessage != null;
 
@@ -75,13 +78,18 @@ class DashboardViewModel extends ChangeNotifier {
     _setLoading(true);
     _clearError();
 
+    // Load user separately so dashboard errors don't lose user data
     try {
-      // Load user name
       final user = await _userRepository.getCurrentUser();
       if (user != null) {
+        _currentUser = user;
         _userName = user.name;
       }
+    } catch (_) {
+      // User fetch failed — continue loading dashboard
+    }
 
+    try {
       // Load dashboard items
       final result = await _dashboardRepository.getDashboardItems();
       _allItems = result.items;

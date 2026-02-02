@@ -16,7 +16,9 @@ class DashboardItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Hero(
+      tag: 'item-card-${item.id}',
+      child: Card(
       elevation: AppDimensions.elevationCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radiusCard),
@@ -67,6 +69,7 @@ class DashboardItemCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

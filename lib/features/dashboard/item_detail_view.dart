@@ -15,54 +15,60 @@ class ItemDetailView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Item Details'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppDimensions.paddingScreen),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header: Status + Priority badges
-            Row(
+      body: Hero(
+        tag: 'item-card-${item.id}',
+        child: Material(
+          type: MaterialType.transparency,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(AppDimensions.paddingScreen),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _statusChip(context),
-                const SizedBox(width: AppDimensions.sm),
-                _priorityChip(context),
-                const Spacer(),
-                _categoryChip(context),
+                // Header: Status + Priority badges
+                Row(
+                  children: [
+                    _statusChip(context),
+                    const SizedBox(width: AppDimensions.sm),
+                    _priorityChip(context),
+                    const Spacer(),
+                    _categoryChip(context),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.md),
+
+                // Title
+                Text(
+                  item.title,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: AppDimensions.md),
+
+                // Description
+                Text(
+                  item.description,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                ),
+                const SizedBox(height: AppDimensions.lg),
+
+                // Progress section
+                _buildProgressSection(context),
+                const SizedBox(height: AppDimensions.lg),
+
+                // Details card
+                _buildDetailsCard(context),
+                const SizedBox(height: AppDimensions.md),
+
+                // Timeline card
+                _buildTimelineCard(context),
+                const SizedBox(height: AppDimensions.lg),
               ],
             ),
-            const SizedBox(height: AppDimensions.md),
-
-            // Title
-            Text(
-              item.title,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: AppDimensions.md),
-
-            // Description
-            Text(
-              item.description,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.6,
-                  ),
-            ),
-            const SizedBox(height: AppDimensions.lg),
-
-            // Progress section
-            _buildProgressSection(context),
-            const SizedBox(height: AppDimensions.lg),
-
-            // Details card
-            _buildDetailsCard(context),
-            const SizedBox(height: AppDimensions.md),
-
-            // Timeline card
-            _buildTimelineCard(context),
-            const SizedBox(height: AppDimensions.lg),
-          ],
+          ),
         ),
       ),
     );

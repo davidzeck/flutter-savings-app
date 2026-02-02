@@ -104,17 +104,20 @@ class _LoginViewState extends State<LoginView> {
     return Column(
       children: [
         // App Icon/Logo
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
-          ),
-          child: const Icon(
-            Icons.business_center,
-            size: AppDimensions.iconXLarge,
-            color: AppColors.textOnPrimary,
+        Hero(
+          tag: 'app-logo',
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
+            ),
+            child: const Icon(
+              Icons.business_center,
+              size: AppDimensions.iconXLarge,
+              color: AppColors.textOnPrimary,
+            ),
           ),
         ),
         const SizedBox(height: AppDimensions.md),

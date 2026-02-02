@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_strings.dart';
-import '../../data/models/user.dart';
 import '../dashboard/dashboard_view.dart';
 import '../dashboard/dashboard_viewmodel.dart';
 import '../profile/profile_view.dart';
@@ -26,11 +25,9 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Consumer<DashboardViewModel>(
       builder: (context, viewModel, _) {
-        final user = _buildUserFromViewModel(viewModel);
-
         final screens = [
           const DashboardView(),
-          ProfileView(user: user),
+          ProfileView(user: viewModel.currentUser),
           SettingsView(
             onLogout: () => _handleLogout(context, viewModel),
             onThemeToggle: _toggleTheme,
@@ -68,22 +65,6 @@ class _HomeShellState extends State<HomeShell> {
           ),
         );
       },
-    );
-  }
-
-  User? _buildUserFromViewModel(DashboardViewModel viewModel) {
-    if (viewModel.userName.isEmpty) return null;
-    // The full user object is available via the repository cache
-    // For the profile screen, we reconstruct from what's available
-    return User(
-      id: 'demo-001',
-      email: 'demo@example.com',
-      name: viewModel.userName,
-      bio: 'Senior Operations Manager at TechCorp Global. 8+ years leading cross-functional teams in enterprise digital transformation. MBA from Stanford.',
-      phone: '+1 (415) 867-5309',
-      profileImage: 'https://i.pravatar.cc/300?u=sarah-mitchell',
-      createdAt: DateTime.now().subtract(const Duration(days: 730)),
-      updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
     );
   }
 

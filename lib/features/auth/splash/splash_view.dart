@@ -100,26 +100,29 @@ class _SplashViewState extends State<SplashView>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // App Icon
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: AppColors.textOnPrimary,
-                  borderRadius: BorderRadius.circular(
-                    AppDimensions.radiusLarge,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
+              Hero(
+                tag: 'app-logo',
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.textOnPrimary,
+                    borderRadius: BorderRadius.circular(
+                      AppDimensions.radiusLarge,
                     ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.business_center,
-                  size: 70,
-                  color: AppColors.primary,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.business_center,
+                    size: 70,
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
 
