@@ -1,30 +1,29 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:enterprise_flutter_mobile_app/features/auth/login/login_view.dart';
+import 'package:enterprise_flutter_mobile_app/features/auth/login/login_viewmodel.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:provider/provider.dart';
+import 'package:enterprise_flutter_mobile_app/data/repositories/user_repository.dart';
 
-import 'package:enterprise_flutter_mobile_app/main.dart';
+class MockUserRepository extends Mock implements UserRepository {}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Login screen displays email and password fields',
+      (WidgetTester tester) async {
+    final mockUserRepo = MockUserRepository();
+    final viewModel = LoginViewModel(mockUserRepo);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChangeNotifierProvider<LoginViewModel>.value(
+          value: viewModel,
+          child: const LoginView(),
+        ),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(TextField), findsNWidgets(2));
+    expect(find.text('Login'), findsWidgets);
   });
 }

@@ -8,6 +8,7 @@ import 'features/auth/login/login_view.dart';
 import 'features/auth/login/login_viewmodel.dart';
 import 'features/dashboard/dashboard_view.dart';
 import 'features/dashboard/dashboard_viewmodel.dart';
+import 'core/widgets/connectivity_banner.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -38,6 +39,11 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+
+      // Wrap all screens with connectivity banner
+      builder: (context, child) {
+        return ConnectivityBanner(child: child!);
+      },
 
       // Initial route
       initialRoute: '/',
