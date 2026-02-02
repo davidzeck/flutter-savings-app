@@ -1,129 +1,476 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_strings.dart';
-import '../../core/di/service_locator.dart';
-import '../../data/repositories/user_repository.dart';
+import 'dashboard_viewmodel.dart';
+import 'widgets/dashboard_item_card.dart';
+import 'widgets/dashboard_stats_card.dart';
+import 'widgets/shimmer_loading.dart';
 
-/// Dashboard screen view (Placeholder)
-///
-/// This is a temporary dashboard screen.
-/// Will be replaced with full implementation in Phase 3.
+/// Full dashboard screen with stats, filters, and item list
 class DashboardView extends StatelessWidget {
-  const DashboardView({Key? key}) : super(key: key);
+  const DashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.dashboard),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: AppStrings.logout,
-            onPressed: () => _handleLogout(context),
+    return Consumer<DashboardViewModel>(
+      builder: (context, viewModel, _) {
+        return Scaffold(
+          appBar: _buildAppBar(context, viewModel),
+          body: _buildBody(context, viewModel),
+        );
+      },
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    DashboardViewModel viewModel,
+  ) {
+    return AppBar(
+      toolbarHeight: viewModel.userName.isNotEmpty ? 64 : kToolbarHeight,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(AppStrings.dashboard),
+          if (viewModel.userName.isNotEmpty)
+            Text(
+              'Welcome, ${viewModel.userName}',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+        ],
+      ),
+      actions: [
+        // Offline indicator
+        if (viewModel.isFromCache)
+          Tooltip(
+            message: AppStrings.cachedData,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.sm,
+                vertical: AppDimensions.xs,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.15),
+                borderRadius:
+                    BorderRadius.circular(AppDimensions.radiusPill),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.cloud_off,
+                    size: 14,
+                    color: AppColors.warning,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'Cached',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Logout button
+        IconButton(
+          icon: const Icon(Icons.logout),
+          tooltip: AppStrings.logout,
+          onPressed: () => _handleLogout(context, viewModel),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody(BuildContext context, DashboardViewModel viewModel) {
+    // Loading state
+    if (viewModel.isLoading) {
+      return const DashboardShimmerLoading();
+    }
+
+    // Error state with no data
+    if (viewModel.hasError && !viewModel.hasItems) {
+      return _buildErrorState(context, viewModel);
+    }
+
+    // Main content with pull-to-refresh
+    return RefreshIndicator(
+      onRefresh: viewModel.refreshDashboard,
+      color: AppColors.primary,
+      child: CustomScrollView(
+        slivers: [
+          // Error banner (if error but has cached data)
+          if (viewModel.hasError)
+            SliverToBoxAdapter(
+              child: _buildErrorBanner(context, viewModel),
+            ),
+
+          // Stats cards
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: AppDimensions.md,
+                bottom: AppDimensions.sm,
+              ),
+              child: DashboardStatsRow(stats: viewModel.stats),
+            ),
+          ),
+
+          // Filter chips
+          SliverToBoxAdapter(
+            child: _buildFilterChips(context, viewModel),
+          ),
+
+          // Items list header
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingScreen,
+                vertical: AppDimensions.sm,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${viewModel.items.length} items',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                  ),
+                  if (viewModel.isRefreshing)
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // Items list or empty state
+          if (viewModel.hasItems)
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingScreen,
+              ),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final item = viewModel.items[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: AppDimensions.sm,
+                      ),
+                      child: DashboardItemCard(
+                        item: item,
+                        onTap: () => _showItemDetail(context, item),
+                      ),
+                    );
+                  },
+                  childCount: viewModel.items.length,
+                ),
+              ),
+            )
+          else
+            SliverFillRemaining(
+              child: _buildEmptyState(context, viewModel),
+            ),
+
+          // Bottom spacing
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppDimensions.xxl),
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppDimensions.paddingScreen),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Success icon
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: AppColors.successLight.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_circle_outline,
-                  size: 60,
-                  color: AppColors.success,
-                ),
+    );
+  }
+
+  // ============================================================================
+  // FILTER CHIPS
+  // ============================================================================
+
+  Widget _buildFilterChips(
+    BuildContext context,
+    DashboardViewModel viewModel,
+  ) {
+    return SizedBox(
+      height: 48,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.paddingScreen,
+        ),
+        children: DashboardFilter.values.map((filter) {
+          final isSelected = viewModel.currentFilter == filter;
+          return Padding(
+            padding: const EdgeInsets.only(right: AppDimensions.sm),
+            child: FilterChip(
+              label: Text(_getFilterLabel(filter)),
+              selected: isSelected,
+              onSelected: (_) => viewModel.setFilter(filter),
+              selectedColor: AppColors.primary.withValues(alpha: 0.15),
+              checkmarkColor: AppColors.primary,
+              labelStyle: TextStyle(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.textSecondary,
+                fontWeight:
+                    isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
-
-              const SizedBox(height: AppDimensions.lg),
-
-              // Welcome message
-              Text(
-                'Welcome to Dashboard!',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                textAlign: TextAlign.center,
+              side: BorderSide(
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.border,
               ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
-              const SizedBox(height: AppDimensions.md),
+  String _getFilterLabel(DashboardFilter filter) {
+    switch (filter) {
+      case DashboardFilter.all:
+        return AppStrings.filterAll;
+      case DashboardFilter.active:
+        return AppStrings.filterActive;
+      case DashboardFilter.pending:
+        return AppStrings.filterPending;
+      case DashboardFilter.completed:
+        return AppStrings.filterCompleted;
+      case DashboardFilter.urgent:
+        return AppStrings.filterUrgent;
+    }
+  }
 
-              Text(
-                'You have successfully logged in.',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                textAlign: TextAlign.center,
-              ),
+  // ============================================================================
+  // STATES
+  // ============================================================================
 
-              const SizedBox(height: AppDimensions.xl),
-
-              // Info card
-              Container(
-                padding: const EdgeInsets.all(AppDimensions.md),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(
-                    AppDimensions.radiusMedium,
+  Widget _buildErrorState(
+    BuildContext context,
+    DashboardViewModel viewModel,
+  ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppDimensions.paddingScreen),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.error,
+            ),
+            const SizedBox(height: AppDimensions.md),
+            Text(
+              AppStrings.dashboardError,
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.sm),
+            Text(
+              viewModel.errorMessage ?? AppStrings.errorGeneric,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                  border: Border.all(
-                    color: AppColors.primary.withOpacity(0.3),
-                    width: AppDimensions.borderThin,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      color: AppColors.primary,
-                      size: AppDimensions.iconMedium,
-                    ),
-                    const SizedBox(height: AppDimensions.sm),
-                    Text(
-                      'This is a placeholder dashboard screen.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppDimensions.xs),
-                    Text(
-                      'Full dashboard implementation will be added in Phase 3.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppDimensions.xl),
-
-              // Logout button
-              OutlinedButton.icon(
-                onPressed: () => _handleLogout(context),
-                icon: const Icon(Icons.logout),
-                label: const Text(AppStrings.logout),
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.lg),
+            ElevatedButton.icon(
+              onPressed: viewModel.loadDashboard,
+              icon: const Icon(Icons.refresh),
+              label: const Text(AppStrings.retry),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
-    // Show confirmation dialog
+  Widget _buildEmptyState(
+    BuildContext context,
+    DashboardViewModel viewModel,
+  ) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 64,
+            color: AppColors.textDisabled,
+          ),
+          const SizedBox(height: AppDimensions.md),
+          Text(
+            AppStrings.noDashboardItems,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+          const SizedBox(height: AppDimensions.sm),
+          if (viewModel.currentFilter != DashboardFilter.all)
+            TextButton(
+              onPressed: () => viewModel.setFilter(DashboardFilter.all),
+              child: const Text('Show all items'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorBanner(
+    BuildContext context,
+    DashboardViewModel viewModel,
+  ) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(
+        AppDimensions.paddingScreen,
+        AppDimensions.sm,
+        AppDimensions.paddingScreen,
+        0,
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimensions.md,
+        vertical: AppDimensions.sm,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.warning.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+        border: Border.all(
+          color: AppColors.warning.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 20,
+            color: AppColors.warning,
+          ),
+          const SizedBox(width: AppDimensions.sm),
+          Expanded(
+            child: Text(
+              '${viewModel.errorMessage} Showing cached data.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.warning,
+                  ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 18),
+            onPressed: viewModel.clearError,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            color: AppColors.warning,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================================
+  // ACTIONS
+  // ============================================================================
+
+  void _showItemDetail(BuildContext context, dynamic item) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppDimensions.radiusBottomSheet),
+        ),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(AppDimensions.paddingScreen),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppDimensions.md),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius:
+                      BorderRadius.circular(AppDimensions.radiusPill),
+                ),
+              ),
+            ),
+
+            Text(
+              item.title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: AppDimensions.sm),
+
+            Text(
+              item.description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: AppDimensions.md),
+
+            // Details
+            _detailRow(context, 'Category', item.category),
+            _detailRow(context, 'Priority', item.priority.name),
+            _detailRow(context, 'Status', item.status.name),
+            _detailRow(context, 'Progress', '${item.progress}%'),
+            if (item.assignedTo != null)
+              _detailRow(context, 'Assigned to', item.assignedTo!),
+
+            const SizedBox(height: AppDimensions.lg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _detailRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppDimensions.xs),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleLogout(
+    BuildContext context,
+    DashboardViewModel viewModel,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -143,11 +490,7 @@ class DashboardView extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      // Perform logout
-      final userRepository = getIt<UserRepository>();
-      await userRepository.logout();
-
-      // Navigate to login
+      await viewModel.logout();
       if (context.mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }

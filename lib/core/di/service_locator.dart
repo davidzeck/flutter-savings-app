@@ -11,9 +11,11 @@ import '../../data/services/storage/local_storage_service.dart';
 
 // Repositories
 import '../../data/repositories/user_repository.dart';
+import '../../data/repositories/dashboard_repository.dart';
 
 // ViewModels
 import '../../features/auth/login/login_viewmodel.dart';
+import '../../features/dashboard/dashboard_viewmodel.dart';
 
 /// Service locator for dependency injection
 ///
@@ -88,11 +90,14 @@ Future<void> setupServiceLocator() async {
     ),
   );
 
-  // ============================================================================
-  // USE CASES (DOMAIN LAYER)
-  // ============================================================================
-
-  // Note: Use cases will be registered here when created (Phase 3+)
+  // Dashboard Repository
+  getIt.registerLazySingleton<DashboardRepository>(
+    () => DashboardRepository(
+      getIt<ApiService>(),
+      getIt<LocalStorageService>(),
+      getIt<NetworkInfo>(),
+    ),
+  );
 
   // ============================================================================
   // VIEW MODELS
@@ -101,6 +106,14 @@ Future<void> setupServiceLocator() async {
   // Login ViewModel - Factory (new instance each time)
   getIt.registerFactory<LoginViewModel>(
     () => LoginViewModel(getIt<UserRepository>()),
+  );
+
+  // Dashboard ViewModel - Factory (new instance each time)
+  getIt.registerFactory<DashboardViewModel>(
+    () => DashboardViewModel(
+      getIt<DashboardRepository>(),
+      getIt<UserRepository>(),
+    ),
   );
 }
 

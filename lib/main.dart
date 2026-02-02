@@ -7,6 +7,7 @@ import 'features/auth/splash/splash_view.dart';
 import 'features/auth/login/login_view.dart';
 import 'features/auth/login/login_viewmodel.dart';
 import 'features/dashboard/dashboard_view.dart';
+import 'features/dashboard/dashboard_viewmodel.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -48,7 +49,10 @@ class MyApp extends StatelessWidget {
               create: (_) => getIt<LoginViewModel>(),
               child: const LoginView(),
             ),
-        '/dashboard': (context) => const DashboardView(),
+        '/dashboard': (context) => ChangeNotifierProvider(
+              create: (_) => getIt<DashboardViewModel>(),
+              child: const DashboardView(),
+            ),
       },
     );
   }
